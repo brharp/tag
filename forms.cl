@@ -1,4 +1,4 @@
-;; -*- mode: common-lisp; package: net.html.forms
+;; -*- mode: common-lisp; package: net.html.forms; -*-
 ;;
 ;; forms.cl
 ;;
@@ -17,79 +17,78 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(require :aserve)
+
+(eval-when (:load :compile)
+  (require :aserve))
+
 
 (defpackage :net.html.forms
   (:use :common-lisp :excl :net.html.generator)
   (:nicknames :forms))
 
+
 (in-package :net.html.forms)
+
+
 
 (defclass webform ()
   ((action :initarg :action :accessor action :type string)
-   (method :initarg :method :accessor form-method :type string)
-   (fields :initarg :fields :accessor fields))
+   (form-method :initarg :method :accessor form-method :type string)
+   (fields :initarg :fields :accessor fields)
+   (on-submit :initarg :on-submit :accessor on-submit)
+   (data-context :initarg :data-context :accessor data-context))
   (:documentation "Class representing HTML forms."))
 
 
 
-(defmethod print-object ((form webform) stream)
-  "Prints an HTML form."
-  (let ((*html-stream* stream))
-    (html ((:form action (action form) method (form-method form))
-           (do-list (field (fields form))
-             (print field stream))))))
+(defmethod html-object ((form webform))
+  (html ((:form action (action form) method (form-method form))
+         (dolist (field (fields form))
+           (html-object field)))))
 
 
 
 (defclass input ()
-  ((name  :initarg :name  :accessor name)
-   (type  :initarg :type  :accessor input-type)
-   (value :initarg :value :accessor value)
-   (label :initarg :label :accessor label))
+  ((name       :initarg :name      :accessor name)
+   (input-type :initarg :type      :accessor input-type)
+   (value      :initarg :value     :accessor value)
+   (label      :initarg :label     :accessor label)
+   (form-data  :initarg :form-data :accessor form-data))
   (:documentation "Defines an HTML input element."))
 
 
 
-
-(defmethod print-object ((input input) stream)
-  (let ((*html-stream* stream))
-    (html ((:label for (name input)) (:princ (label input)))
-          ((:input name (name input) type (input-type input)
-                   value (value input))))))
+;; Default method after setting form-data---copies form-data
+;; to input value.
+(defmethod (setf form-data) :after (data (input input))
+  (setf (value input) data))
 
 
 
-(defgeneric form-data (input)
-  (:documentation "Returns form data for a control (as a string.)"))
-
-
-(defgeneric set-form-data (input data)
-  (:documentation "Sets form data for a control."))
-
-
-(defsetf form-data set-form-data)
-
-
-(defmethod form-data ((input input))
-  "The default implementation of form-data. Returns the value slot."
-  (slot-value input 'value))
-
-
-
-(defmethod set-form-data ((input input) (data string))
-  "The default implementation of set-form-data."
-  (setf (slot-value input 'value) data))
+(defmethod html-object ((input input))
+  (html ((:label for (name input)) (:princ (label input)))
+        ((:input name (name input) type (input-type input)
+                 value (value input)))))
 
 
 
 
 
+    
 (defun process-form (form form-data)
-  "Sets the form-data of each control.")
+  "Sets values from user input, validates, and calls the submit handler."
+  (dolist (field (fields form))
+    (let ((data (cdr (assoc (name field) form-data :test #'equal))))
+      (setf (form-data field) data))))
+                    
+	
 
 
 
 
-
-
+(let ((test-form (make-instance 'webform
+                   :action "action" :method "post"
+                   :fields (list (make-instance 'input :name "foo" :type "text" :value "" :label "Foo")))))
+  (process-form test-form '(("foo" . "Hello, World!")))
+  (let ((*html-stream* *standard-output*))
+    (html-object test-form)))

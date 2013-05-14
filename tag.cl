@@ -8,11 +8,7 @@
                    :map '(("home" "index.clp")))
 
 (defun profile-add (req ent)
-  (let ((name     (request-query-value "name" req))
-        (mail     (request-query-value "mail" req))
-        (subjects (request-query-value "subjects" req))
-        (profile  (make-instance 'tutor-profile))
-        (form     (profile-form profile)))
+  (let ((form (profile-form (make-instance 'tutor-profile))))
     (if* (eq :get (request-method req))
        then (print form *html-stream*)
        else (process-form form (request-query req))

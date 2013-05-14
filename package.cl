@@ -5,7 +5,7 @@
 
 (defpackage :ca.uoguelph.www.tag
   (:use :common-lisp :excl :net.html.generator :net.aserve
-        :db.allegrocache :net.uri)
+        :db.allegrocache :net.uri :net.html.forms :data.binding)
   (:nicknames :tag))
 
 (in-package :ca.uoguelph.www.tag)

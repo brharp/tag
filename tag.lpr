@@ -3,12 +3,12 @@
 (in-package :cg-user)
 
 (define-project :name :tag
-  :modules (list (make-instance 'module :name "package")
+  :modules (list (make-instance 'module :name "kvc")
+                 (make-instance 'module :name "forms")
+                 (make-instance 'module :name "package")
                  (make-instance 'module :name "model")
                  (make-instance 'module :name "view") (make-instance 'module :name "tag")
-                 (make-instance 'module :name "index.clp")
-                 (make-instance 'module :name "forms")
-                 (make-instance 'module :name "kvc"))
+                 (make-instance 'module :name "index.clp"))
   :projects nil
   :libraries nil
   :editable-files (list "edit-profile.clp")

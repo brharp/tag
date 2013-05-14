@@ -36,18 +36,11 @@
     :action *request-uri*
     :method "post"
     :on-submit #'profile-submit
-    :fields (list (make-instance 'input :type "hidden" :name "id" :value (id p))
-                  (make-instance 'input :type "text" :name "name" :label "Name" :value (name p))
-                  (make-instance 'input :type "text" :name "mail" :label "Mail" :value (mail p)))))
+    :fields (list (make-instance 'input :type "hidden" :name "id"   :value (id p))
+                  (make-instance 'input :type "text"   :name "name" :label "Name" :value (name p))
+                  (make-instance 'input :type "text"   :name "mail" :label "Mail" :value (mail p)))))
 
-            
-(defun process-form (form form-data)
-  "Sets values from user input, validates, and calls the submit handler."
-  (dolist (field (fields form) (submit-form form))
-    (let ((data (cdr (assoc (name field) form-data :test #'equal))))
-      (setf (form-data field) data))))
-                    
-		
+        	
 
 (defun edit-profile (profile &key action destination)
   (let ((id       (if profile (db-object-oid profile) ""))
