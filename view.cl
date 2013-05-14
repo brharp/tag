@@ -30,17 +30,18 @@
                                  (db-object-oid profile))) "Edit")))))
 
 
-(defun profile-form (profile)
+(defmethod object-webform ((p tutor-profile))
   "Returns a form for editing a profile."
   (make-instance 'webform
-    :action *request-uri*
-    :method "post"
-    :on-submit #'profile-submit
-    :fields (list (make-instance 'input :type "hidden" :name "id"   :value (id p))
+    :data-context p
+    :fields (list (make-instance 'input :type "hidden" :name "id"   :value (db-object-oid p))
                   (make-instance 'input :type "text"   :name "name" :label "Name" :value (name p))
                   (make-instance 'input :type "text"   :name "mail" :label "Mail" :value (mail p)))))
 
-        	
+
+(let ((*allegrocache* *tutor-db*)
+      (*request-url* "add/profile"))
+  (object-webform (make-instance 'tutor-profile :name "Brent" :mail "brharp@example.com")))
 
 (defun edit-profile (profile &key action destination)
   (let ((id       (if profile (db-object-oid profile) ""))

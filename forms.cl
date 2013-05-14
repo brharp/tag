@@ -24,17 +24,24 @@
 
 (defpackage :net.html.forms
   (:use :common-lisp :excl :net.html.generator)
+  (:export #:webform #:input #:object-webform #:*request-url*)
   (:nicknames :forms))
 
 
 (in-package :net.html.forms)
 
 
+(defvar *request-url*)
+
+
+(defgeneric object-webform (object)
+  (:documentation "Returns a webform instance for editing object."))
+
 
 (defclass webform ()
-  ((action :initarg :action :accessor action :type string)
-   (form-method :initarg :method :accessor form-method :type string)
-   (fields :initarg :fields :accessor fields)
+  ((action :initarg :action :accessor action :type string :initform *request-url*)
+   (form-method :initarg :method :accessor form-method :type string :initform "post")
+   (fields :initarg :fields :accessor fields :initform nil)
    (on-submit :initarg :on-submit :accessor on-submit)
    (data-context :initarg :data-context :accessor data-context))
   (:documentation "Class representing HTML forms."))
