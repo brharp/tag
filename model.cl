@@ -16,6 +16,7 @@
 (defmethod key-value ((object tutor-profile) (key (eql 'tags)))
   (profile-tags object))
 
+
 (defun create-profile (&key name mail subjects &allow-other-keys)
   (let ((*allegrocache* *tutor-db*))
     (prog1 (make-instance 'tutor-profile :name name

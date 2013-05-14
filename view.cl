@@ -30,6 +30,24 @@
                                  (db-object-oid profile))) "Edit")))))
 
 
+(defun profile-form (profile)
+  "Returns a form for editing a profile."
+  (make-instance 'webform
+    :action *request-uri*
+    :method "post"
+    :on-submit #'profile-submit
+    :fields (list (make-instance 'input :type "hidden" :name "id" :value (id p))
+                  (make-instance 'input :type "text" :name "name" :label "Name" :value (name p))
+                  (make-instance 'input :type "text" :name "mail" :label "Mail" :value (mail p)))))
+
+            
+(defun process-form (form form-data)
+  "Sets values from user input, validates, and calls the submit handler."
+  (dolist (field (fields form) (submit-form form))
+    (let ((data (cdr (assoc (name field) form-data :test #'equal))))
+      (setf (form-data field) data))))
+                    
+		
 
 (defun edit-profile (profile &key action destination)
   (let ((id       (if profile (db-object-oid profile) ""))
@@ -39,10 +57,9 @@
         (tags     (if profile (profile-tags profile)))
         (notes    (if profile (notes profile) ""))
         )
-    (page "Edit Profile"
-          (html
-           (:h1 "Edit profile")
-           ((:form action action :method "post")
+    (page "Edit Profile" (print (profile-form profile) *html-stream*))
+    (html (:h1 "Edit profile")
+          ((:form action action :method "post")
             ;; ID
             ((:input :type "hidden" :name "id" :value id))
             ;; Destination
@@ -65,7 +82,7 @@
             ((:textarea :name "notes" :rows 10)
              (:princ-safe notes))
             ;; Submit
-            (:div ((:input :type "submit" :value "Submit" :class "default"))))))))
+            (:div ((:input :type "submit" :value "Submit" :class "default")))))))
 
 
 
@@ -101,4 +118,5 @@
                 (html (:ol (dolist (result results)
                              (html (:li ((:a :href (format nil "/profile/view?id=~a" (db-object-oid result))) 
                                          (:princ-safe (name result))))))))))))
+
 
