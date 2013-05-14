@@ -1,4 +1,4 @@
-;; -*- lisp-version: "9.0 [Windows] (Sep 7, 2012 15:37)"; cg: "9.0"; -*-
+;; -*- lisp-version: "9.0 [Mac OS X (Intel)] (Apr 23, 2013 19:28)"; cg: "9.0"; -*-
 
 (in-package :cg-user)
 
@@ -7,7 +7,9 @@
                  (make-instance 'module :name "model")
                  (make-instance 'module :name "view")
                  (make-instance 'module :name "tag.lisp")
-                 (make-instance 'module :name "index.clp"))
+                 (make-instance 'module :name "index.clp")
+                 (make-instance 'module :name "forms")
+                 (make-instance 'module :name "kvc"))
   :projects nil
   :libraries nil
   :editable-files (list "edit-profile.clp")

@@ -83,3 +83,13 @@
 
 
 
+
+
+(defun process-form (form form-data)
+  "Sets the form-data of each control.")
+
+
+
+
+
+
