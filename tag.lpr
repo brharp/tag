@@ -8,7 +8,6 @@
                  (make-instance 'module :name "package")
                  (make-instance 'module :name "model")
                  (make-instance 'module :name "view") (make-instance 'module :name "tag")
-                 (make-instance 'module :name "index.clp")
                  (make-instance 'module :name "controller"))
   :projects nil
   :libraries nil

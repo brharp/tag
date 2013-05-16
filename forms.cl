@@ -24,7 +24,8 @@
 
 (defpackage :net.html.forms
   (:use :common-lisp :excl :net.html.generator)
-  (:export #:webform #:input #:object-webform #:*request-url*)
+  (:export #:webform #:input #:object-webform
+           #:object-html #:submit-form #:*request-url*)
   (:nicknames :forms))
 
 
@@ -47,11 +48,9 @@
   (:documentation "Class representing HTML forms."))
 
 
-
-(defmethod html-object ((form webform))
-  (html ((:form action (action form) method (form-method form))
-         (dolist (field (fields form))
-           (html-object field)))))
+(defmethod object-html ((form webform))
+  `((:form :action ,(action form) :method ,(form-method form))
+    ,@(mapcar #'object-html (fields form))))
 
 
 
@@ -64,17 +63,15 @@
    (on-value-change :initarg :on-value-change :accessor on-value-change))
   (:documentation "Defines an HTML input element."))
 
+(defmethod object-html ((input input))
+  `(((:label :for ,(name input)) (:princ ,(label input)))
+    ((:input :name ,(name input) :type ,(input-type input) :value ,(value input)))))
 
 (defmethod (setf value) :after (new-value (input input))
   (let ((on-value-change))
     (when (setq on-value-change (on-value-change input))
       (funcall on-value-change new-value))))
 
-
-(defmethod html-object ((input input))
-  (html ((:label for (name input)) (:princ (label input)))
-        ((:input name (name input) type (input-type input)
-                 value (value input)))))
 
 
 
@@ -95,10 +92,10 @@
         (input       (car form-data)  (car form-data))
         (input-name  (car input)      (car input))
         (input-value (cdr input)      (cdr input)))
-       ((null form-data))
+       ((null form-data) t)
     ;; Lookup the form field for each input, and set input-value.
-    (let ((field (find input-name (form-fields form) :key #'input-name)))
-      (setf (input-value field) input-value))))
+    (let ((field (find input-name (fields form) :key #'name :test #'equal)))
+      (when field (setf (value field) input-value)))))
 
 
 

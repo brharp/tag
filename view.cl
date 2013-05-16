@@ -1,5 +1,6 @@
 (in-package :ca.uoguelph.www.tag)
 
+
 ;; View
 
 (defun navigation ()
