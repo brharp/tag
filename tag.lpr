@@ -8,13 +8,14 @@
                  (make-instance 'module :name "package")
                  (make-instance 'module :name "model")
                  (make-instance 'module :name "view") (make-instance 'module :name "tag")
-                 (make-instance 'module :name "index.clp"))
+                 (make-instance 'module :name "index.clp")
+                 (make-instance 'module :name "controller"))
   :projects nil
   :libraries nil
   :editable-files (list "edit-profile.clp")
   :distributed-files (list "css/" "css/style.css")
   :internally-loaded-files nil
-  :project-package-name :ca.uoguelph.www.tag
+  :project-package-name :common-graphics-user
   :main-form nil
   :compilation-unit t
   :concatenate-project-fasls nil

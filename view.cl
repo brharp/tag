@@ -30,18 +30,22 @@
                                  (db-object-oid profile))) "Edit")))))
 
 
-(defmethod object-webform ((p tutor-profile))
+(defmethod object-webform ((object tutor-profile))
   "Returns a form for editing a profile."
   (make-instance 'webform
-    :data-context p
-    :fields (list (make-instance 'input :type "hidden" :name "id"   :value (db-object-oid p))
-                  (make-instance 'input :type "text"   :name "name" :label "Name" :value (name p))
-                  (make-instance 'input :type "text"   :name "mail" :label "Mail" :value (mail p)))))
-
-
-(let ((*allegrocache* *tutor-db*)
-      (*request-url* "add/profile"))
-  (object-webform (make-instance 'tutor-profile :name "Brent" :mail "brharp@example.com")))
+    :fields (list 
+             ;; Name
+             (make-instance 'input :type "text" :name "name" :label "Name" :value (name object)
+               :on-value-change #'(lambda (new-value) (setf (name object) new-value)))
+             ;; Mail
+             (make-instance 'input :type "text" :name "mail" :label "Mail" :value (mail object)
+               :on-value-change #'(lambda (new-value) (setf (mail object) new-value)))
+             ;; Tags
+             (make-instance 'input :type "text" :name "tags" :label "Tags"
+               :value (list-to-delimited-string (tags object) ", ")
+               :on-value-change #'(lambda (new-value)
+                                    (setf (tags object) (delimited-string-to-list new-value ", "))))
+             )))
 
 (defun edit-profile (profile &key action destination)
   (let ((id       (if profile (db-object-oid profile) ""))

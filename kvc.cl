@@ -28,51 +28,11 @@
 
 (in-package :data.binding)
 
-
-
 (defgeneric key-value (object key)
   (:documentation "Returns the value of key in object."))
 
-
-
-(defgeneric set-key-value (object key value)
+(defgeneric (setf key-value) (value object key)
   (:documentation "Sets the value of key in object."))
 
-
-
-(defsetf key-value set-key-value)
-
-
-
-(defmethod key-value ((object t) (key string))
-  "Converts string keys to symbols in the current package."
-  (key-value object (intern (string-upcase key))))
-
-
-
-
-(defmethod set-key-value ((object t) (key string) value)
-  "Converts string keys to symbols in the current package."
-  (set-key-value object (intern (string-upcase key)) value))
-
-
-
-
-
 (defmethod key-value ((object t) (key symbol))
-  "Default implementation of key-value. Returns the value of
-the slot named by key."
   (slot-value object key))
-
-
-
-
-
-(defmethod set-key-value ((object t) (key symbol) value)
-  "Default implementation of set-key-value. Sets the value of
-the slot named by key."
-  (setf (slot-value object key) value))
-
-
-
-

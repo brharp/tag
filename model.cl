@@ -68,10 +68,13 @@
    (profile :initarg :profile :accessor tag-profile :index :any))
   (:metaclass persistent-class))
 
-(defun profile-tags (profile)
-  (let ((*allegrocache* *tutor-db*))
-    (mapcar #'tag-name (retrieve-from-index 'tag 'profile profile :all t))))
+(defun tags (profile)
+  (mapcar #'tag-name (retrieve-from-index 'tag 'profile profile :all t)))
 
+(defun (setf tags) (new-tags object)
+  (unless (member name (profile-tags profile) :test #'string-equal)
+    (make-instance 'tag :name name :profile profile)))
+  
 (defun tagged-profiles (name)
   (let ((*allegrocache* *tutor-db*))
     (mapcar #'tag-profile (retrieve-from-index 'tag 'name name :all t))))

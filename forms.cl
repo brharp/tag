@@ -39,7 +39,7 @@
 
 
 (defclass webform ()
-  ((action :initarg :action :accessor action :type string :initform *request-url*)
+  ((action :initarg :action :accessor action :type string :initform ".")
    (form-method :initarg :method :accessor form-method :type string :initform "post")
    (fields :initarg :fields :accessor fields :initform nil)
    (on-submit :initarg :on-submit :accessor on-submit)
@@ -56,20 +56,19 @@
 
 
 (defclass input ()
-  ((name       :initarg :name      :accessor name)
-   (input-type :initarg :type      :accessor input-type)
-   (value      :initarg :value     :accessor value)
-   (label      :initarg :label     :accessor label)
-   (form-data  :initarg :form-data :accessor form-data))
+  ((name            :initarg :name            :accessor name)
+   (input-type      :initarg :type            :accessor input-type)
+   (value           :initarg :value           :accessor value)
+   (label           :initarg :label           :accessor label)
+   (form-data       :initarg :form-data       :accessor form-data)
+   (on-value-change :initarg :on-value-change :accessor on-value-change))
   (:documentation "Defines an HTML input element."))
 
 
-
-;; Default method after setting form-data---copies form-data
-;; to input value.
-(defmethod (setf form-data) :after (data (input input))
-  (setf (value input) data))
-
+(defmethod (setf value) :after (new-value (input input))
+  (let ((on-value-change))
+    (when (setq on-value-change (on-value-change input))
+      (funcall on-value-change new-value))))
 
 
 (defmethod html-object ((input input))
@@ -88,7 +87,19 @@
     (let ((data (cdr (assoc (name field) form-data :test #'equal))))
       (setf (form-data field) data))))
                     
-	
+
+
+(defun submit-form (form form-data)
+  ;; Iterate over form inputs.
+  (do* ((form-data   form-data        (cdr form-data))
+        (input       (car form-data)  (car form-data))
+        (input-name  (car input)      (car input))
+        (input-value (cdr input)      (cdr input)))
+       ((null form-data))
+    ;; Lookup the form field for each input, and set input-value.
+    (let ((field (find input-name (form-fields form) :key #'input-name)))
+      (setf (input-value field) input-value))))
+
 
 
 
