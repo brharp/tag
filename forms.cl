@@ -60,18 +60,18 @@
    (value           :initarg :value           :accessor value)
    (label           :initarg :label           :accessor label)
    (form-data       :initarg :form-data       :accessor form-data)
-   (on-value-change :initarg :on-value-change :accessor on-value-change))
+   (on-change       :initarg :on-change       :accessor on-change))
   (:documentation "Defines an HTML input element."))
 
 (defmethod object-html ((input input))
   `(((:label :for ,(name input)) (:princ ,(label input)))
     ((:input :name ,(name input) :type ,(input-type input) :value ,(value input)))))
 
-(defmethod (setf value) :after (new-value (input input))
-  (let ((on-value-change))
-    (when (setq on-value-change (on-value-change input))
-      (funcall on-value-change new-value))))
-
+(defmethod (setf value) :around (new-value (input input))
+  (let ((on-change-function) (old-value (value input)))
+    (if (or (null (setq on-change-function (on-change input)))
+            (funcall on-change-function input new-value old-value))
+        (call-next-method new-value input))))
 
 
 

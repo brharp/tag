@@ -37,15 +37,15 @@
     :fields (list 
              ;; Name
              (make-instance 'input :type "text" :name "name" :label "Name" :value (name object)
-               :on-value-change #'(lambda (new-value) (setf (name object) new-value)))
+               :on-change #'(lambda (new-value) (setf (name object) new-value)))
              ;; Mail
              (make-instance 'input :type "text" :name "mail" :label "Mail" :value (mail object)
-               :on-value-change #'(lambda (new-value) (setf (mail object) new-value)))
+               :on-change #'(lambda (new-value) (setf (mail object) new-value)))
              ;; Tags
              (make-instance 'input :type "text" :name "tags" :label "Tags"
                :value (list-to-delimited-string (tags object) ", ")
-               :on-value-change #'(lambda (new-value)
-                                    (setf (tags object) (delimited-string-to-list new-value ", "))))
+               :on-change #'(lambda (new-value)
+                              (setf (tags object) (delimited-string-to-list new-value ", "))))
              )))
 
 (defun edit-profile (profile &key action destination)
