@@ -31,11 +31,8 @@
                                  (db-object-oid profile))) "Edit")))))
 
 
-(defmethod object-edit-form ((object tutor-profile)
-                             &key (action ".") (form-method "post"))
-  (make-profile-form object 
-                     :action action 
-                     :form-method form-method))
+(defmethod object-edit-form ((object tutor-profile) &key (action ".") (form-method "post"))
+  (make-profile-form object :action action :form-method form-method))
 
 
 (defun make-profile-form (object &key (action ".") (form-method "post"))
@@ -85,7 +82,13 @@
                          (declare (ignore input old-value))
                          (setf (notes object) new-value)
                          t)
-        )))
+          )
+        (make-instance 'fieldset
+          :fields (list (make-instance 'input
+                          :name "submit"
+                          :type "submit"
+                          :value "Submit")))
+        ))
 
 
 

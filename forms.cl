@@ -24,7 +24,7 @@
 
 (defpackage :net.html.forms
   (:use :common-lisp :excl :net.html.generator)
-  (:export #:form #:input #:object-edit-form #:submit-form)
+  (:export #:form #:input #:fieldset #:object-edit-form #:submit-form)
   (:nicknames :forms))
 
 
@@ -42,15 +42,16 @@
    (on-submit :initarg :on-submit :accessor on-submit))
   (:documentation "Class representing HTML forms."))
 
-
 (defclass input ()
-  ((name            :initarg :name            :accessor name)
-   (input-type      :initarg :type            :accessor input-type)
-   (value           :initarg :value           :accessor value)
-   (label           :initarg :label           :accessor label)
-   (on-change       :initarg :on-change       :accessor on-change))
+  ((name            :initarg :name                          :accessor name)
+   (input-type      :initarg :type        :initform "text"  :accessor input-type)
+   (value           :initarg :value       :initform ""      :accessor value)
+   (label           :initarg :label       :initform nil     :accessor label)
+   (on-change       :initarg :on-change   :initform nil     :accessor on-change))
   (:documentation "Defines an HTML input element."))
 
+(defclass fieldset ()
+  ((fields :initarg :fields :initform nil :accessor fields)))
 
 (defmethod print-object ((form form) stream)
   (let ((*html-stream* stream))
@@ -58,12 +59,16 @@
            (dolist (field (fields form))
              (print field stream))))))
 
-
 (defmethod print-object ((input input) stream)
   (let ((*html-stream* stream))
-    (html ((:label :for (name input)) (:princ (label input)))
-          ((:input :name (name input) :type (input-type input) :value (value input))))))
+    (when (label input) (html ((:label :for (name input)) (:princ (label input)))))
+    (html ((:input :name (name input) :type (input-type input) :value (value input))))))
 
+(defmethod print-object ((fieldset fieldset) stream)
+  (let ((*html-stream* stream))
+    (html ((:fieldset)
+           (dolist (field (fields fieldset))
+             (print field stream))))))
 
 
 (defmethod (setf value) :around (new-value (input input))
