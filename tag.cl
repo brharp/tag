@@ -143,7 +143,9 @@
 ;; Static resources
 
 (publish-directory :prefix "/css/" 
-                   :destination "css/")
+                   :destination #P"C:\\Users\\brharp\\Documents\\allegro-projects\\tag\\css")
+
+
 
 ;; Startup
 (open-tutor-database "tutor.db")
