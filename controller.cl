@@ -16,7 +16,12 @@
        then
             (with-http-response (req ent)
               (with-http-body (req ent)
-                (print form *html-stream*)))
+                (html 
+                 (:html
+                  (:head (:title "Edit")
+                         ((:link rel "stylesheet" href "/css/style.css" type "text/css")))
+                  (:body ((:div class :section)
+                          (:princ form)))))))
        else
             (if* (submit-form form form-data)
                then 
