@@ -2,7 +2,7 @@
 ;;
 ;; forms.cl
 ;;
-;; Copyright 2013 M Brent Harp
+;; Copyright 2013 M. Brent Harp
 ;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,34 +24,23 @@
 
 (defpackage :net.html.forms
   (:use :common-lisp :excl :net.html.generator)
-  (:export #:webform #:input #:object-webform
-           #:object-html #:submit-form #:*request-url*)
+  (:export #:form #:input #:object-edit-form #:submit-form)
   (:nicknames :forms))
 
 
 (in-package :net.html.forms)
 
 
-(defvar *request-url*)
+(defgeneric object-edit-form (object &key action form-method)
+  (:documentation "Returns a form instance for editing an object."))
 
 
-(defgeneric object-webform (object)
-  (:documentation "Returns a webform instance for editing object."))
-
-
-(defclass webform ()
+(defclass form ()
   ((action :initarg :action :accessor action :type string :initform ".")
    (form-method :initarg :method :accessor form-method :type string :initform "post")
    (fields :initarg :fields :accessor fields :initform nil)
-   (on-submit :initarg :on-submit :accessor on-submit)
-   (data-context :initarg :data-context :accessor data-context))
+   (on-submit :initarg :on-submit :accessor on-submit))
   (:documentation "Class representing HTML forms."))
-
-
-(defmethod object-html ((form webform))
-  `((:form :action ,(action form) :method ,(form-method form))
-    ,@(mapcar #'object-html (fields form))))
-
 
 
 (defclass input ()
@@ -59,30 +48,31 @@
    (input-type      :initarg :type            :accessor input-type)
    (value           :initarg :value           :accessor value)
    (label           :initarg :label           :accessor label)
-   (form-data       :initarg :form-data       :accessor form-data)
    (on-change       :initarg :on-change       :accessor on-change))
   (:documentation "Defines an HTML input element."))
 
-(defmethod object-html ((input input))
-  `(((:label :for ,(name input)) (:princ ,(label input)))
-    ((:input :name ,(name input) :type ,(input-type input) :value ,(value input)))))
+
+(defmethod print-object ((form form) stream)
+  (let ((*html-stream* stream))
+    (html ((:form :action (action form) :method (form-method form))
+           (dolist (field (fields form))
+             (print field stream))))))
+
+
+(defmethod print-object ((input input) stream)
+  (let ((*html-stream* stream))
+    (html ((:label :for (name input)) (:princ (label input)))
+          ((:input :name (name input) :type (input-type input) :value (value input))))))
+
+
 
 (defmethod (setf value) :around (new-value (input input))
-  (let ((on-change-function) (old-value (value input)))
-    (if (or (null (setq on-change-function (on-change input)))
-            (funcall on-change-function input new-value old-value))
-        (call-next-method new-value input))))
-
-
-
-
-
-    
-(defun process-form (form form-data)
-  "Sets values from user input, validates, and calls the submit handler."
-  (dolist (field (fields form))
-    (let ((data (cdr (assoc (name field) form-data :test #'equal))))
-      (setf (form-data field) data))))
+  (let ((old-value (value input)))
+    (call-next-method new-value input)
+    (let ((on-change-function (on-change input)))
+      (or (null on-change-function)
+          (funcall on-change-function input new-value old-value)
+          (setf (value input) old-value)))))
                     
 
 
@@ -99,11 +89,3 @@
 
 
 
-
-
-(let ((test-form (make-instance 'webform
-                   :action "action" :method "post"
-                   :fields (list (make-instance 'input :name "foo" :type "text" :value "" :label "Foo")))))
-  (process-form test-form '(("foo" . "Hello, World!")))
-  (let ((*html-stream* *standard-output*))
-    (html-object test-form)))

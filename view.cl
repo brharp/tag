@@ -31,22 +31,64 @@
                                  (db-object-oid profile))) "Edit")))))
 
 
-(defmethod object-webform ((object tutor-profile))
-  "Returns a form for editing a profile."
-  (make-instance 'webform
-    :fields (list 
-             ;; Name
-             (make-instance 'input :type "text" :name "name" :label "Name" :value (name object)
-               :on-change #'(lambda (new-value) (setf (name object) new-value)))
-             ;; Mail
-             (make-instance 'input :type "text" :name "mail" :label "Mail" :value (mail object)
-               :on-change #'(lambda (new-value) (setf (mail object) new-value)))
-             ;; Tags
-             (make-instance 'input :type "text" :name "tags" :label "Tags"
-               :value (list-to-delimited-string (tags object) ", ")
-               :on-change #'(lambda (new-value)
-                              (setf (tags object) (delimited-string-to-list new-value ", "))))
-             )))
+(defmethod object-edit-form ((object tutor-profile)
+                             &key (action ".") (form-method "post"))
+  (make-profile-form object 
+                     :action action 
+                     :form-method form-method))
+
+
+(defun make-profile-form (object &key (action ".") (form-method "post"))
+  (make-instance 'form
+    :action action
+    :method form-method
+    :fields (make-profile-fields object)))
+
+
+(defun make-profile-fields (object)
+  (list (make-instance 'input 
+          :type "text"
+          :name "name"
+          :label "Name" 
+          :value (name object)
+          :on-change #'(lambda (input new-value old-value)
+                         (declare (ignore input old-value))
+                         (setf (name object) new-value)
+                         t)
+          )
+        (make-instance 'input
+          :type "text" 
+          :name "mail"
+          :label "Mail"
+          :value (mail object)
+          :on-change #'(lambda (input new-value old-value)
+                         (declare (ignore input old-value))
+                         (setf (mail object) new-value)
+                         t)
+          )
+        (make-instance 'input
+          :type "text"
+          :name "tags"
+          :label "Tags"
+          :value (list-to-delimited-string (tags object) ", ")
+          :on-change #'(lambda (input new-value old-value)
+                         (let ((tags-list (delimited-string-to-list new-value ", ")))
+                           (setf (tags object) tags-list)
+                           t))
+          )
+        (make-instance 'input
+          :name "notes"
+          :label "Notes"
+          :type "text"
+          :value (notes object)
+          :on-change #'(lambda (input new-value old-value)
+                         (declare (ignore input old-value))
+                         (setf (notes object) new-value)
+                         t)
+        )))
+
+
+
 
 (defun edit-profile (profile &key action destination)
   (let ((id       (if profile (db-object-oid profile) ""))

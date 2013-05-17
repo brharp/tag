@@ -6,7 +6,8 @@
 (defpackage :ca.uoguelph.www.tag
   (:use :common-lisp :excl :net.html.generator :net.aserve
         :db.allegrocache :net.uri :net.html.forms :data.binding)
-  (:nicknames :tag))
+  (:nicknames :tag)
+  (:export #:tutor-profile))
 
 (in-package :ca.uoguelph.www.tag)
 

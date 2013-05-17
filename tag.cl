@@ -53,9 +53,11 @@
               (with-http-body (req ent))))
     ))
 
+
 (publish :path "/profile/edit"
          :content-type "text/html"
          :function #'profile-edit)
+
 
 (defun profile-view (req ent)
   ;; Get query values.

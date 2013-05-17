@@ -6,10 +6,10 @@
 ;; (((((((((((( Profiles ))))))))))))
 
 (defclass tutor-profile ()
-  ((name     :initarg :name     :accessor name)
-   (mail     :initarg :mail     :accessor mail)
-   (subjects :initarg :subjects :accessor subjects :index :any)
-   (notes    :initarg :notes    :accessor notes))
+  ((name     :initarg :name     :accessor name     :initform "")
+   (mail     :initarg :mail     :accessor mail     :initform "")
+   (subjects :initarg :subjects :accessor subjects :initform "")
+   (notes    :initarg :notes    :accessor notes    :initform ""))
   (:metaclass persistent-class))
 
 

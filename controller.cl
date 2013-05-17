@@ -3,30 +3,40 @@
 
 ;; Object controller
 
+
 (defun add-action (req ent)
-  
+ 
   (let* ((type-name (request-query-value "type" req))
-         (type      (intern type-name))
-         (object    (make-instance type))
-         (form      (object-webform object)))
-    
-    (flet ((show-form ()
-              (with-http-header (req ent)
-                (with-http-body (req ent)
-                  (print form *html-stream*)))))
-      
-      (if* (eq :get (request-method req))
-         then
-              (show-form)
-              (rollback)
-         else
-              (if* (submit-form form form-data)
-                 then (redirect-to object req ent)
-                 else (show-form))
-              ))))
+         (package-name (request-query-value "package" req))
+         (type (intern type-name package-name))
+         (object (make-instance type))
+         (form (object-edit-form object)))
+                     
+    (if* (eq :get (request-method req))
+       then
+            (with-http-response (req ent)
+              (with-http-body (req ent)
+                (print form *html-stream*)))
+       else
+            (if* (submit-form form form-data)
+               then 
+                    (with-http-response (req ent :response *response-found*)
+                      (setf (reply-header-slot-value req :location)
+                        (format nil "~a/profile/view?id=~a" *base-url*
+                          (db-object-oid object)))
+                      (with-http-body (req ent)))
+               else 
+                    (with-http-response (req ent)
+                      (with-http-body (req ent)
+                        (print form *html-stream*)))))))
 
 
-(publish :path "/add" :content-type "text/html" :function #'add-action)
+(publish :path "/add" :content-type "text/html"
+         :function #'(lambda (req ent)
+                       (let ((*allegrocache* *tutor-db*))
+                         (add-action req ent))))
+
+
 
 (defun edit-action (req ent)
   ;; get object by oid
