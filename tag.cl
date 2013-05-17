@@ -143,7 +143,7 @@
 ;; Static resources
 
 (publish-directory :prefix "/css/" 
-                   :destination #P"C:\\Users\\brharp\\Documents\\allegro-projects\\tag\\css")
+                   :destination "C:/Users/brharp/Documents/allegro-projects/tag/css/")
 
 
 
