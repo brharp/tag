@@ -64,31 +64,35 @@
 ;; (((((((((((( Tags ))))))))))))
 
 (defclass tag ()
-  ((name :initarg :name :accessor tag-name :index :any)
-   (profile :initarg :profile :accessor tag-profile :index :any))
-  (:metaclass persistent-class))
+  ((name   :initarg :name   :accessor tag-name   :index :any)
+   (object :initarg :object :accessor tag-object :index :any))
+  (:metaclass persistent-class)
+  (:documentation "Tags attach text to an object. Tags are indexed on
+the name field and object field, for efficient retrieval of all tags
+for a given object, or all objects with a given tag."))
 
-(defun tags (profile)
-  (mapcar #'tag-name (retrieve-from-index 'tag 'profile profile :all t)))
+(defun tags (object)
+  "Returns a list of tag names applied to an object."
+  (mapcar #'tag-name (retrieve-from-index 'tag 'object object :all t)))
 
 (defun (setf tags) (new-tags object)
-  (unless (member name (profile-tags profile) :test #'string-equal)
-    (make-instance 'tag :name name :profile profile)))
+  (let ((old-tags (tags object)))
+    ;; Remove old tags.
+    (dolist (tag-name (set-difference old-tags new-tags :test #'equal))
+      (remove-tag tag-name object))
+    ;; Add new tags.
+    (dolist (tag-name (set-difference new-tags old-tags :test #'equal))
+      (add-tag tag-name object)))
+  new-tags)
   
-(defun tagged-profiles (name)
-  (let ((*allegrocache* *tutor-db*))
-    (mapcar #'tag-profile (retrieve-from-index 'tag 'name name :all t))))
+(defun tagged-objects (tag-name)
+  (mapcar #'tag-object (retrieve-from-index 'tag 'name name :all t)))
   
 (defun add-tag (name profile)
-  (let ((*allegrocache* *tutor-db*))
-    (unless (member name (profile-tags profile) :test #'string-equal)
-      (make-instance 'tag :name name :profile profile))))
+  (unless (member name (profile-tags profile) :test #'string-equal)
+    (make-instance 'tag :name name :profile profile)))
 
-(defun remove-tag (name profile)
-  (let ((*allegrocache* *tutor-db*))
-    (let ((tags (retrieve-from-index 'tag 'profile profile :all t)))
-      (dolist (tag (remove name tags :key #'tag-name :test (complement #'string-equal)))
-        (delete-instance tag)))))
-    
-(defun list-tags (profile)
-  (retrieve-from-index 'tag 'profile profile))
+(defun remove-tag (name object)
+  (let ((tags (retrieve-from-index 'tag 'object object :all t)))
+    (dolist (tag (remove name tags :key #'tag-name :test (complement #'string-equal)))
+      (delete-instance tag))))
