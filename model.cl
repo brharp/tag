@@ -88,9 +88,9 @@ for a given object, or all objects with a given tag."))
 (defun tagged-objects (tag-name)
   (mapcar #'tag-object (retrieve-from-index 'tag 'name name :all t)))
   
-(defun add-tag (name profile)
-  (unless (member name (profile-tags profile) :test #'string-equal)
-    (make-instance 'tag :name name :profile profile)))
+(defun add-tag (name object)
+  (unless (member name (tags object) :test #'string-equal)
+    (make-instance 'tag :name name :object object)))
 
 (defun remove-tag (name object)
   (let ((tags (retrieve-from-index 'tag 'object object :all t)))
