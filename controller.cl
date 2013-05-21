@@ -18,7 +18,7 @@
     (flet ((show-form ()
              (with-http-response (req ent)
                (with-http-body (req ent)
-                 (html (:html (:head (:title "Edit")
+                 (html (:html (:head (:title "Add")
                                      ((:link rel "stylesheet" href "/css/style.css" type "text/css")))
                               (:body ((:div class :section)
                                       (:princ form))))))))
@@ -39,6 +39,10 @@
                  else (show-form))))))
 
 
+
+
+
+
 (publish :path "/add" :content-type "text/html"
          :function #'(lambda (req ent)
                        (handler-case
@@ -49,6 +53,10 @@
                                     (with-http-response (req ent)
                                       (with-http-body (req ent)
                                         (html (:princ-safe c))))))))
+
+
+
+
 
 
 (defun view-action (req ent)
@@ -63,6 +71,8 @@
     
 
 
+
+
 (publish :path "/view" :content-type "text/html"
          :function #'(lambda (req ent)
                        (handler-case
@@ -72,6 +82,9 @@
                                     (with-http-response (req ent)
                                       (with-http-body (req ent)
                                         (html (:princ-safe c))))))))
+
+
+
 
 
 
@@ -93,6 +106,10 @@
 
 
 
+
+
+
+
 (publish :path "/list" :content-type "text/html"
          :function #'(lambda (req ent)
                        (handler-case
@@ -105,9 +122,53 @@
 
            
 
+
+
+
+
+
   
 (defun edit-action (req ent)
-  ;; get object by oid
-  ;; bind *forms-default-action*, etc.
-  ;; get form for object
-  )
+  
+  "Edit a persistent database object."
+  
+  (let* ((oid (parse-integer (request-query-value "oid" req)))
+         (object (oid-to-object* t oid))
+         (action (format nil "/edit?oid=~a" oid))
+         (form (object-edit-form object :action action))
+         (form-data (request-query req)))
+    
+    (flet ((show-form ()
+             (with-http-response (req ent)
+               (with-http-body (req ent)
+                 (html (:html (:head (:title "Edit")
+                                     ((:link rel "stylesheet" href "/css/style.css" type "text/css")))
+                              (:body ((:div class :section)
+                                      (:princ form))))))))
+           
+           (send-redirect ()
+              (with-http-response (req ent :response *response-found*)
+                (setf (reply-header-slot-value req :location)
+                  (format nil "~a/view?oid=~a" *base-url* (db-object-oid object)))
+                (with-http-body (req ent)))))
+                      
+      (if* (eq :get (request-method req))
+         then
+              (show-form)
+              (rollback)
+         else
+              (if* (submit-form form form-data)
+                 then (send-redirect)
+                 else (show-form))))))
+
+
+(publish :path "/edit" :content-type "text/html"
+         :function #'(lambda (req ent)
+                       (handler-case
+                           (let ((*allegrocache* *tutor-db*))
+                             (edit-action req ent))
+                         (condition (c)
+                                    (with-http-response (req ent)
+                                      (with-http-body (req ent)
+                                        (html (:princ-safe c))))))))
+
