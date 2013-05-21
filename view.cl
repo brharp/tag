@@ -30,6 +30,16 @@
               (:div ((:a :href (format nil "~a/profile/edit?id=~a&go=/profile/view" *base-url*
                                  (db-object-oid profile))) "Edit")))))
 
+(defmethod object-html ((profile tutor-profile))
+  `(:html
+    (:body
+     (:h1 (:princ-safe ,(name profile)))
+     (:div ((:a href ,(mail profile)) (:princ-safe ,(mail profile))))
+     (:div (:princ-safe ,(list-to-delimited-string (tags profile) ", ")))
+     (:div (:princ-safe ,(notes profile)))
+     (:div ((:a :href ,(format nil "~a/edit?oid=~a" *base-url*
+                         (db-object-oid profile))) "Edit")))))
+
 
 (defmethod object-edit-form ((object tutor-profile) &key (action ".") (form-method "post"))
   (make-profile-form object :action action :form-method form-method))
