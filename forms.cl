@@ -51,7 +51,8 @@
   (:documentation "Defines an HTML input element."))
 
 (defclass fieldset ()
-  ((fields :initarg :fields :initform nil :accessor fields)))
+  ((name   :initarg :name   :initform nil :accessor name)
+   (fields :initarg :fields :initform nil :accessor fields)))
 
 (defmethod print-object ((form form) stream)
   (let ((*html-stream* stream))
@@ -90,7 +91,8 @@
        ((null form-data) t)
     ;; Lookup the form field for each input, and set input-value.
     (let ((field (find input-name (fields form) :key #'name :test #'equal)))
-      (when field (setf (value field) input-value)))))
+      (when field (setf (value field) input-value))))
+  t)
 
 
 
