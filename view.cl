@@ -49,7 +49,8 @@
   (make-instance 'form
     :action action
     :method form-method
-    :fields (make-profile-fields object)))
+    :fields (make-profile-fields object)
+    :on-submit #'commit))
 
 
 (defun make-profile-fields (object)

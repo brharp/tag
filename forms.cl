@@ -92,6 +92,9 @@
     ;; Lookup the form field for each input, and set input-value.
     (let ((field (find input-name (fields form) :key #'name :test #'equal)))
       (when field (setf (value field) input-value))))
+  ;; Call submit callback.
+  (let ((on-form-submit (on-submit form)))
+    (when on-form-submit (funcall on-form-submit)))
   t)
 
 
