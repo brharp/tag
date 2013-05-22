@@ -191,7 +191,7 @@
     
     (with-http-response (req ent :response *response-found*)
       (setf (reply-header-slot-value req :location)
-        (format nil "~a/list?type=~a&package" *base-url* type-name package-name))
+        (format nil "~a/list?type=~a&package=~a" *base-url* type-name package-name))
       (with-http-body (req ent)))))
 
 
@@ -203,7 +203,7 @@
          :function #'(lambda (req ent)
                        (handler-case
                            (let ((*allegrocache* *tutor-db*))
-                             (edit-action req ent)
+                             (delete-action req ent)
                              (rollback))
                          (condition (c)
                            (with-http-response (req ent)
