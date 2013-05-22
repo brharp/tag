@@ -37,8 +37,12 @@
      (:div ((:a href ,(mail profile)) (:princ-safe ,(mail profile))))
      (:div (:princ-safe ,(list-to-delimited-string (tags profile) ", ")))
      (:div (:princ-safe ,(notes profile)))
-     (:div ((:a :href ,(format nil "~a/edit?oid=~a" *base-url*
-                         (db-object-oid profile))) "Edit")))))
+     (:div
+      (:ul
+       (:li ((:a :href ,(format nil "~a/edit?oid=~a" *base-url*
+                          (db-object-oid profile))) "Edit"))
+       (:li ((:a :href ,(format nil "~a/delete?oid=~a&type=TUTOR-PROFILE&package=TAG"
+                          *base-url* (db-object-oid profile))) "Delete")))))))
 
 
 (defmethod object-edit-form ((object tutor-profile) &key (action ".") (form-method "post"))
