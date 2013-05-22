@@ -32,7 +32,6 @@
       (if* (eq :get (request-method req))
          then
               (show-form)
-              (rollback)
          else
               (if* (submit-form form form-data)
                  then (send-redirect)
@@ -48,11 +47,11 @@
                        (handler-case
                            (let ((*allegrocache* *tutor-db*))
                              (add-action req ent)
-                             (commit))
+                             (rollback))
                          (condition (c)
-                                    (with-http-response (req ent)
-                                      (with-http-body (req ent)
-                                        (html (:princ-safe c))))))))
+                           (with-http-response (req ent)
+                             (with-http-body (req ent)
+                               (html (:princ-safe c))))))))
 
 
 
@@ -77,11 +76,12 @@
          :function #'(lambda (req ent)
                        (handler-case
                            (let ((*allegrocache* *tutor-db*))
-                             (view-action req ent))
+                             (view-action req ent)
+                             (rollback))
                          (condition (c)
-                                    (with-http-response (req ent)
-                                      (with-http-body (req ent)
-                                        (html (:princ-safe c))))))))
+                           (with-http-response (req ent)
+                             (with-http-body (req ent)
+                               (html (:princ-safe c))))))))
 
 
 
@@ -114,11 +114,12 @@
          :function #'(lambda (req ent)
                        (handler-case
                            (let ((*allegrocache* *tutor-db*))
-                             (list-action req ent))
+                             (list-action req ent)
+                             (rollback))
                          (condition (c)
-                                    (with-http-response (req ent)
-                                      (with-http-body (req ent)
-                                        (html (:princ-safe c))))))))
+                           (with-http-response (req ent)
+                             (with-http-body (req ent)
+                               (html (:princ-safe c))))))))
 
            
 
@@ -155,7 +156,6 @@
       (if* (eq :get (request-method req))
          then
               (show-form)
-              (rollback)
          else
               (if* (submit-form form form-data)
                  then (send-redirect)
@@ -166,9 +166,47 @@
          :function #'(lambda (req ent)
                        (handler-case
                            (let ((*allegrocache* *tutor-db*))
-                             (edit-action req ent))
+                             (edit-action req ent)
+                             (rollback))
                          (condition (c)
                                     (with-http-response (req ent)
                                       (with-http-body (req ent)
                                         (html (:princ-safe c))))))))
+
+
+
+
+(defun delete-action (req ent)
+  
+  "Delete a persistent database object."
+  
+  (let* ((oid (parse-integer (request-query-value "oid" req)))
+         (type-name (request-query-value "type" req))
+         (package-name (request-query-value "package" req))
+         (type (intern type-name package-name))
+         (object (oid-to-object type oid)))
+    
+    (delete-instance object)
+    (commit)
+    
+    (with-http-response (req ent :response *response-found*)
+      (setf (reply-header-slot-value req :location)
+        (format nil "~a/list?type=~a&package" *base-url* type-name package-name))
+      (with-http-body (req ent)))))
+
+
+
+
+
+
+(publish :path "/delete" :content-type "text/html"
+         :function #'(lambda (req ent)
+                       (handler-case
+                           (let ((*allegrocache* *tutor-db*))
+                             (edit-action req ent)
+                             (rollback))
+                         (condition (c)
+                           (with-http-response (req ent)
+                             (with-http-body (req ent)
+                               (html (:princ-safe c))))))))
 
