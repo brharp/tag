@@ -210,3 +210,27 @@
                              (with-http-body (req ent)
                                (html (:princ-safe c))))))))
 
+
+(publish-prefix 
+ :path "/profile"
+ :function #'(lambda (req ent)
+               (re-case (request-path (request-uri req))
+                        ("profile/.*" () (list it))
+                        ("foo the (.*)" ((it 1)) (list it))
+                        (t :no-match))))
+
+
+(defun get-profile (req ent)
+  (let* ((args (rest (uri-parsed-path (request-uri req))))
+         (profile-id (parse-integer (second args)))
+         (profile (oid-to-object 'tutor-profile profile-id)))
+    (with-http-response (req ent)
+      (with-http-body (req ent)
+        (html
+         (:html
+          (:head)
+          (:body
+           (:h1 (:princ (profile-name profile))))))))))
+
+         
+    
