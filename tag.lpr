@@ -8,7 +8,8 @@
                  (make-instance 'module :name "package")
                  (make-instance 'module :name "model")
                  (make-instance 'module :name "view") (make-instance 'module :name "tag")
-                 (make-instance 'module :name "controller"))
+                 (make-instance 'module :name "controller")
+                 (make-instance 'module :name "locregex"))
   :projects nil
   :libraries nil
   :editable-files (list "edit-profile.clp")

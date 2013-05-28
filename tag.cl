@@ -61,13 +61,14 @@
 
 (defun profile-view (req ent)
   ;; Get query values.
-  (let ((id (parse-integer (request-query-value "id" req))))
+  (let* ((positional-parameters (parse-uri (uri-path (request-uri req))))
+         (id (parse-integer (second positional-parameters))))
     (let ((profile (load-profile :oid id)))
       (with-http-response (req ent)
         (with-http-body (req ent)
           (profile-page profile))))))
 
-(publish :path "/profile"
+(publish-regex :pattern "/profile/[0-9]+"
          :content-type "text/html"
          :function #'profile-view)
 
